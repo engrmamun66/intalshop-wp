@@ -1,0 +1,104 @@
+/*
+ * Global full-page preloader (every page, not a Customizer toggle). Hidden
+ * by assets/js/preloader.js, 2 seconds after the page's "load" event (all
+ * resources finished, not just DOMContentLoaded) — the CSS alone doesn't
+ * know when to hide, it just owns the visuals and the fade-out transition.
+ */
+.solaris-preloader {
+	position: fixed;
+	inset: 0;
+	z-index: 100000; /* Above everything, including the sticky header (900) and mobile menu (1000). */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	opacity: 1;
+	/* Purely visual — never blocks clicks/interaction with the page
+	   underneath, even while still showing (not just after it fades out). */
+	pointer-events: none;
+	transition: opacity 0.4s ease;
+}
+.solaris-preloader.is-hidden {
+	opacity: 0;
+}
+
+.solaris-preloader__spinner {
+	--color-1: #81d742;
+	--size: 1px;
+
+	font-size: calc(48 * var(--size));
+	color: var(--color-1);
+	width: 1em;
+	height: 1em;
+	box-sizing: border-box;
+	background: var(--gradient-primary); /* The petal dots below (box-shadow) can't take a gradient — box-shadow color is solid-only — so they stay currentcolor. */
+	position: relative;
+	border-radius: 50%;
+	transform: rotateX(-60deg) perspective(calc(1000 * var(--size)));
+}
+
+/*
+ * --size is a fixed 48px-ish pixel size regardless of viewport — fine on a
+ * normal monitor, but on something like a 65" display running at QHD/4K,
+ * that reads as a tiny speck relative to the whole screen and is easy to
+ * miss entirely even though it's rendering correctly. Scale it up on wide
+ * viewports so it stays proportionally visible.
+ */
+@media (min-width: 2560px) {
+	.solaris-preloader__spinner { --size: 2px; }
+}
+@media (min-width: 3840px) {
+	.solaris-preloader__spinner { --size: 3px; }
+}
+.solaris-preloader__spinner:before,
+.solaris-preloader__spinner:after {
+	content: '';
+	display: block;
+	position: absolute;
+	box-sizing: border-box;
+	top: 0;
+	left: 0;
+	width: inherit;
+	height: inherit;
+	border-radius: inherit;
+	animation: solaris-preloader-flow 1s ease-out infinite;
+}
+.solaris-preloader__spinner:after {
+	animation-delay: 0.4s;
+}
+
+@keyframes solaris-preloader-flow {
+	0% {
+		opacity: 1;
+		transform: rotate(0deg);
+		box-shadow:
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor,
+			0 0 0 -0.5em currentcolor;
+	}
+	100% {
+		opacity: 0;
+		transform: rotate(180deg);
+		box-shadow:
+			-1em -1em 0 -0.35em currentcolor,
+			0 -1.5em 0 -0.35em currentcolor,
+			1em -1em 0 -0.35em currentcolor,
+			-1.5em 0 0 -0.35em currentcolor,
+			1.5em -0 0 -0.35em currentcolor,
+			-1em 1em 0 -0.35em currentcolor,
+			0 1.5em 0 -0.35em currentcolor,
+			1em 1em 0 -0.35em currentcolor;
+	}
+}
+
+/*
+ * Deliberately NOT frozen under prefers-reduced-motion, unlike this
+ * theme's other decorative motion (birds, Fighter-Z, etc.) — this spinner
+ * is a functional loading-status indicator, not decorative flourish, so it
+ * keeps animating regardless of that setting.
+ */

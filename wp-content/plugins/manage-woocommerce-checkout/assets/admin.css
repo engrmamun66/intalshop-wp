@@ -1,0 +1,16 @@
+.mwc-wrap .nav-tab-wrapper {
+	margin-bottom: 20px;
+}
+.mwc-fields-table th,
+.mwc-fields-table td {
+	padding: 10px 12px;
+	vertical-align: top;
+}
+.mwc-fields-table .mwc-options-raw {
+	width: 100%;
+	max-width: 260px;
+}
+.mwc-fields-table input[type="text"].regular-text {
+	width: 100%;
+	max-width: 220px;
+}

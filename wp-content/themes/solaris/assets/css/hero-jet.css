@@ -1,0 +1,142 @@
+/*
+ * "Fly Fighter-Z" — a single decorative fighter-jet silhouette that does an
+ * occasional straight horizontal flyby, in a randomly-chosen direction each
+ * pass (assets/js/hero-jet.js drives the randomization/timing and toggles
+ * the two keyframes below; this file only owns the visuals). Nose points
+ * right in the source SVG — is-facing-left mirrors it via scaleX(-1) for
+ * right-to-left passes, since a top-down jet silhouette isn't left/right
+ * symmetric enough to skip that.
+ *
+ * Fixed to the viewport (not the hero section) — this used to live only
+ * inside the homepage hero, but it's now its own Customizer section that
+ * can target any page (or all of them), most of which have no hero at all.
+ */
+.hero-jet-layer {
+	position: fixed;
+	inset: 0;
+	overflow: hidden;
+	z-index: 20;
+	pointer-events: none;
+}
+.hero-jet {
+	position: absolute;
+	/* top (Customizer: From Top) and aspect-ratio are set inline per solaris_render_hero_jet(). */
+	left: 0;
+	height: auto;
+	opacity: 0;
+}
+.hero-jet__craft {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.hero-jet.is-facing-left .hero-jet__craft {
+	transform: scaleX(-1);
+}
+.hero-jet__body {
+	display: block;
+	width: 100%;
+	height: 100%;
+	/*
+	 * Safety net only: the box's aspect-ratio is normally computed server-
+	 * side from this exact image's own dimensions, so this has nothing to
+	 * do in the common case. It only engages if that lookup couldn't
+	 * happen (e.g. an uploaded SVG, which WordPress doesn't store
+	 * width/height for) and the box falls back to a generic ratio —
+	 * letterboxing then, rather than stretching the image out of shape.
+	 */
+	object-fit: contain;
+}
+
+/*
+ * TFA (Thrust Force Animation) — the animated engine-exhaust flame behind
+ * Fighter-Z. Positioned at "right: 100%" (flush against the craft's own
+ * left edge) because the source art's nose points right by default, so the
+ * tail is on the left — a child of .hero-jet__craft flips together with the
+ * body when is-facing-left mirrors the craft, so the flame keeps trailing
+ * the tail rather than ending up stuck on the nose.
+ */
+.hero-jet-thrust {
+	position: absolute;
+	top: 50%;
+	right: 100%;
+	height: 38%;
+	transform: translateY(-50%);
+	background: linear-gradient(to left, rgba(255, 226, 130, 0.95), rgba(255, 140, 40, 0.65) 55%, rgba(255, 80, 20, 0) 100%);
+	clip-path: polygon(0 15%, 100% 50%, 0 85%);
+	transform-origin: right center;
+	animation: hero-jet-thrust-flicker 0.18s ease-in-out infinite alternate;
+}
+@keyframes hero-jet-thrust-flicker {
+	0%   { transform: translateY(-50%) scaleX(1); opacity: 1; }
+	100% { transform: translateY(-50%) scaleX(0.82); opacity: 0.82; }
+}
+/*
+ * Deliberately not frozen under prefers-reduced-motion — the site owner
+ * wants Fighter-Z fully visible/animating regardless of that OS setting
+ * for their own testing/demo purposes. Real accessibility tradeoff:
+ * visitors with motion sensitivity no longer get this decorative flight
+ * suppressed automatically.
+ */
+
+/*
+ * No opacity fade during the flight itself — only at 0%/100% (the exact
+ * edges), held via animation-fill-mode:forwards until hero-jet.js sets
+ * animation:none for the pause between flights, which is what actually
+ * reveals/hides it (falling back to the base .hero-jet{opacity:0} rule).
+ * A fade partway through used to run identically in both directions, but
+ * only looked right for left-to-right: by the time it faded out near
+ * left:100%, the box's own width had already carried it past the
+ * container's right edge, so overflow:hidden was already clipping it —
+ * the fade was invisible cleanup. Right-to-left has no equivalent natural
+ * clip near left:0% (the box never goes negative), so that same fade
+ * ran while it was still fully on-screen, reading as vanishing early.
+ */
+@keyframes hero-jet-fly-ltr {
+	0%   { left: 0%; opacity: 1; }
+	100% { left: 100%; opacity: 1; }
+}
+@keyframes hero-jet-fly-rtl {
+	0%   { left: 100%; opacity: 1; }
+	100% { left: calc(0% - 200px); opacity: 1; }
+}
+
+/*
+ * Fixed to the viewport's bottom-left corner — same reasoning as
+ * .hero-jet-layer above: this needs to work identically on every page, not
+ * just floating inline next to a hero's own CTA buttons. An opaque brand-
+ * dark background (not the old translucent white, made for sitting over a
+ * dark hero photo) keeps the icon legible over any page background, light
+ * or dark.
+ */
+.hero-jet-sound-toggle {
+	position: fixed;
+	bottom: 24px;
+	left: 24px;
+	pointer-events: auto; /* .hero-jet-layer above sets pointer-events:none; this opts back in. */
+	appearance: none;
+	-webkit-appearance: none;
+	border: 0;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(11, 61, 46, 0.85);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+	color: var(--color-white);
+	cursor: pointer;
+	transition: background var(--transition-base), transform var(--transition-base);
+}
+.hero-jet-sound-toggle:hover { background: rgba(11, 61, 46, 0.95); transform: scale(1.06); }
+.hero-jet-sound-toggle.is-playing { background: var(--gradient-primary); }
+.hero-jet-sound-icon { width: 20px; height: 20px; }
+.hero-jet-sound-icon--on { display: none; }
+.hero-jet-sound-toggle.is-playing .hero-jet-sound-icon--off { display: none; }
+.hero-jet-sound-toggle.is-playing .hero-jet-sound-icon--on { display: block; }
+
+@media (max-width: 640px) {
+	.hero-jet-layer { display: none; }
+}

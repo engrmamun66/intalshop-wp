@@ -1,0 +1,30 @@
+.solaris-product-nav {
+	display: inline-flex;
+	gap: 4px;
+	margin-left: 8px;
+	vertical-align: middle;
+}
+.solaris-product-nav__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #f6f7f7;
+	color: #2271b1;
+	text-decoration: none;
+}
+.solaris-product-nav__btn:before {
+	font-size: 18px;
+	line-height: 1;
+}
+.solaris-product-nav__btn:hover:not(.is-disabled) {
+	background: #f0f0f1;
+	border-color: #8c8f94;
+}
+.solaris-product-nav__btn.is-disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}

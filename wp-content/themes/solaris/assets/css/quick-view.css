@@ -1,0 +1,162 @@
+/*
+ * Product-card "Quick View" (Customizer: Product Cards → Show Quick View
+ * Button). Same open/close mechanics as search-modal.css/cart-panel.css
+ * elsewhere in this theme (visibility delayed on close so the panel's own
+ * transform/opacity transition gets a chance to play instead of vanishing
+ * instantly). Unlike cart-panel.css there's only one presentation — a
+ * centered dialog — no Customizer-driven mode to switch between.
+ */
+.quick-view-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 2000;
+	visibility: hidden;
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	transition: visibility 0s linear var(--transition-slow-duration);
+}
+.quick-view-modal[data-open="true"] {
+	visibility: visible;
+	pointer-events: auto;
+	transition-delay: 0s;
+}
+body.quick-view-open { overflow: hidden; }
+
+.quick-view-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(7, 28, 21, 0.55);
+	opacity: 0;
+	transition: opacity var(--transition-slow);
+}
+.quick-view-modal[data-open="true"] .quick-view-modal__backdrop { opacity: 1; }
+
+.quick-view-modal__panel {
+	position: relative;
+	background: var(--color-white);
+	width: 100%;
+	max-width: 900px;
+	max-height: 85vh;
+	overflow-y: auto;
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-lg);
+	padding: 40px;
+	transform: scale(0.94);
+	opacity: 0;
+	transition: transform var(--transition-slow), opacity var(--transition-slow);
+}
+.quick-view-modal[data-open="true"] .quick-view-modal__panel {
+	transform: scale(1);
+	opacity: 1;
+}
+.quick-view-modal__close {
+	position: absolute;
+	top: 16px; right: 16px;
+	z-index: 1;
+	appearance: none;
+	-webkit-appearance: none;
+	border: 0;
+	background: var(--color-background-alt);
+	cursor: pointer;
+	width: 40px; height: 40px;
+	display: flex; align-items: center; justify-content: center;
+	border-radius: 50%;
+	color: var(--color-heading);
+	transition: background var(--transition-base);
+}
+.quick-view-modal__close:hover { background: var(--color-border); }
+.quick-view-modal__close svg { width: 20px; height: 20px; }
+
+/* Same spinner recipe as .search-modal__spinner, sized down slightly. */
+.quick-view-modal__spinner {
+	width: 32px; height: 32px;
+	border-radius: 50%;
+	border: 3px solid var(--color-border);
+	border-top-color: var(--color-accent);
+	margin: 60px auto;
+	animation: btn-spin 0.8s linear infinite;
+}
+
+/* --- Quick View button on the card (stacked under the wishlist heart) --- */
+.quick-view-toggle {
+	position: absolute;
+	top: 56px; right: 14px; /* wishlist-toggle's own top:14px + its 34px height + 8px gap */
+	z-index: 2;
+	appearance: none;
+	-webkit-appearance: none;
+	border: 0;
+	background: rgba(255, 255, 255, 0.85);
+	font: inherit;
+	cursor: pointer;
+	width: 34px; height: 34px;
+	display: flex; align-items: center; justify-content: center;
+	border-radius: 50%;
+	color: var(--color-muted);
+	box-shadow: var(--shadow-sm);
+	transition: background var(--transition-base), color var(--transition-base), transform var(--transition-base);
+}
+.quick-view-toggle svg { width: 17px; height: 17px; }
+.quick-view-toggle:hover { transform: scale(1.1); color: var(--color-accent); background: var(--color-white); }
+
+/* --- Injected product content (inc/ajax-quick-view.php) ----------------- */
+.quick-view-product {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 32px;
+}
+.quick-view-product__gallery img {
+	width: 100%;
+	border-radius: var(--radius-md);
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+}
+.quick-view-product__title { margin: 0 0 12px; }
+.quick-view-product__price {
+	font-size: 1.5rem;
+	font-weight: 800;
+	color: var(--color-dark-green);
+	margin-bottom: 16px;
+}
+.quick-view-product__price del { color: var(--color-muted); font-weight: 400; opacity: 0.7; }
+.quick-view-product__price ins { text-decoration: none; color: var(--color-accent); }
+.quick-view-product__excerpt { color: var(--color-muted); margin-bottom: 20px; }
+.quick-view-product__excerpt p:last-child { margin-bottom: 0; }
+/*
+ * The add-to-cart form here is WooCommerce's own single-product template
+ * (inc/ajax-quick-view.php calls woocommerce_template_single_add_to_cart()
+ * directly) — but this modal isn't nested in "div.product" the way the real
+ * single-product page is, so that page's own ".woocommerce div.product
+ * .quantity input" width override (woocommerce.css) never reaches it,
+ * leaving the quantity input at core's default width:3.631em + the theme's
+ * global input padding — the exact same clipping bug already fixed for the
+ * cart page. Scoping the same fix to .quick-view-product directly, rather
+ * than relying on that ancestor, also means this isn't affected by
+ * .woocommerce being a body class that some pages (e.g. the homepage) don't
+ * carry — quick view can be triggered from any of them.
+ */
+.quick-view-product .quantity input.qty {
+	width: 70px;
+	padding: 10px 8px;
+	text-align: center;
+}
+.quick-view-product form.cart {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin: 0 0 20px;
+}
+.quick-view-product__full-link {
+	display: inline-block;
+	color: var(--color-accent);
+	font-weight: 700;
+	text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+	.quick-view-product { grid-template-columns: 1fr; }
+	.quick-view-modal__panel { padding: 24px; }
+}

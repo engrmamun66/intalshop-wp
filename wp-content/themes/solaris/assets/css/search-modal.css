@@ -1,0 +1,131 @@
+.search-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 2000;
+	visibility: hidden;
+	pointer-events: none;
+	/*
+	 * visibility isn't interpolated — it just snaps at the start of a
+	 * transition unless delayed. Without this delay, closing the modal hid
+	 * the whole thing (panel included) at the exact instant data-open
+	 * flipped to false, before the panel's slide-down transform transition
+	 * ever got a chance to render — it looked instant because it WAS
+	 * instant; the animation was happening on an already-invisible element.
+	 * Delaying visibility:hidden by the same duration as the slide keeps it
+	 * visible throughout the close animation, then hides it once it's done.
+	 * NOTE: must use --transition-slow-duration (a bare time value) here,
+	 * not --transition-slow (duration+easing combined) — the delay slot
+	 * only accepts one <time>, so the compound value makes this whole
+	 * declaration invalid and the browser silently drops it.
+	 */
+	transition: visibility 0s linear var(--transition-slow-duration);
+}
+.search-modal[data-open="true"] {
+	visibility: visible;
+	pointer-events: auto;
+	transition-delay: 0s;
+}
+
+.search-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(7, 28, 21, 0.55);
+	opacity: 0;
+	transition: opacity var(--transition-slow);
+}
+.search-modal[data-open="true"] .search-modal__backdrop { opacity: 1; }
+
+.search-modal__panel {
+	position: absolute;
+	top: 70px; left: 0; right: 0; bottom: 0;
+	background: var(--color-white);
+	border-radius: 20px 20px 0 0;
+	display: flex;
+	flex-direction: column;
+	transform: translateY(100%);
+	transition: transform var(--transition-slow);
+	overflow: hidden;
+	box-shadow: 0 -10px 40px rgba(7, 28, 21, 0.25);
+}
+.search-modal[data-open="true"] .search-modal__panel { transform: translateY(0); }
+
+.search-modal__bar {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 24px clamp(20px, 4vw, 40px);
+	border-bottom: 1px solid var(--color-border);
+	flex-shrink: 0;
+}
+.search-modal__field {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: var(--color-background-alt);
+	border-radius: var(--radius-pill);
+	padding-inline: 20px;
+}
+.search-modal__field svg { width: 20px; height: 20px; color: var(--color-muted); flex-shrink: 0; }
+.search-modal__field input {
+	border: 0;
+	background: none;
+	padding-block: 16px;
+	font-size: 1.1rem;
+	width: 100%;
+}
+.search-modal__field input:focus { outline: none; box-shadow: none; }
+.search-modal__bar select {
+	width: auto;
+	padding: 12px 16px;
+	border-radius: var(--radius-pill);
+	flex-shrink: 0;
+}
+.search-modal__close {
+	appearance: none;
+	-webkit-appearance: none;
+	border: 0;
+	background: none;
+	font: inherit;
+	cursor: pointer;
+	width: 44px; height: 44px;
+	display: flex; align-items: center; justify-content: center;
+	color: var(--color-heading);
+	border-radius: 50%;
+	flex-shrink: 0;
+	transition: background var(--transition-base);
+}
+.search-modal__close:hover { background: var(--color-background-alt); }
+.search-modal__close svg { width: 22px; height: 22px; }
+
+.search-modal__meta {
+	padding: 14px clamp(20px, 4vw, 40px) 0;
+	color: var(--color-muted);
+	font-size: 0.85rem;
+	flex-shrink: 0;
+}
+
+.search-modal__results {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px clamp(20px, 4vw, 40px) 48px;
+}
+
+.search-modal__spinner {
+	width: 32px; height: 32px;
+	border-radius: 50%;
+	border: 3px solid var(--color-border);
+	border-top-color: var(--color-accent);
+	margin: 60px auto;
+	animation: btn-spin 0.8s linear infinite;
+}
+
+body.search-modal-open { overflow: hidden; }
+
+@media (max-width: 640px) {
+	.search-modal__panel { top: 56px; border-radius: 16px 16px 0 0; }
+	.search-modal__bar { flex-wrap: wrap; }
+	.search-modal__field { width: 100%; order: 1; }
+	.search-modal__bar select { order: 2; }
+	.search-modal__close { order: 3; margin-left: auto; }
+}

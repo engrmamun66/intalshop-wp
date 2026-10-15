@@ -1,0 +1,59 @@
+# --------------------------------------------------------------
+# WordPress — Intalshop
+#
+# Tracked: WordPress core, wp-content/themes, wp-content/plugins.
+# Ignored: secrets, user uploads, caches, generated config, logs.
+#
+# NOTE: do NOT add ignore rules for wp-content/mu-plugins/,
+# plugins/smooth-publisher-ink/, .sc_*/, cache/.gx_* or stray
+# *.zip files. Those match a known backdoor pattern (see
+# CLAUDE.md) and must stay visible in `git status` if they
+# ever reappear.
+# --------------------------------------------------------------
+
+# Secrets / environment-specific config
+wp-config.php
+.htaccess
+.user.ini
+php.ini
+.env
+.env.*
+
+# User-generated media (back up separately, not in git)
+wp-content/uploads/
+
+# Caches & runtime state
+wp-content/cache/
+wp-content/upgrade/
+wp-content/upgrade-temp-backup/
+wp-content/backup-db/
+wp-content/backups/
+wp-content/blogs.dir/
+wp-content/.wp-object-cache-*
+wp-content/debug.log
+
+# W3 Total Cache generated files
+wp-content/advanced-cache.php
+wp-content/object-cache.php
+wp-content/db.php
+wp-content/w3tc-config/
+nginx.conf
+
+# Logs
+*.log
+error_log
+
+# Dependencies installed by tooling (if any get added later)
+node_modules/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Local tooling
+.playwright-mcp/
+.claude/settings.local.json

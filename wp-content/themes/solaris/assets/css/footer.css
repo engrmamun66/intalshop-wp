@@ -1,0 +1,254 @@
+.site-footer {
+	position: relative;
+	background: var(--color-footer-bg);
+	color: var(--color-footer-text);
+	padding-top: 32px;
+}
+.site-footer a { color: var(--color-footer-text); }
+.site-footer a:hover { color: var(--color-footer-accent); }
+.site-footer h2, .site-footer h3, .site-footer h4 { color: var(--color-footer-heading); }
+/*
+ * .footer-wave is position:absolute with z-index:auto — per CSS paint
+ * order, in-flow static content actually paints BEFORE positioned
+ * z-index:auto siblings regardless of DOM order, so without this the wave
+ * (especially its Full Height wash) would paint on top of the widgets/
+ * copyright content instead of behind it. Scoped to direct children only
+ * — .container is used all over the theme, not footer-specific.
+ */
+.site-footer > .container { position: relative; z-index: 1; }
+
+/*
+ * Footer wave animation system — three selectable CSS/SVG-only styles
+ * (Gentle/Ocean/Aurora), chosen via the Customizer (Footer section →
+ * "Wave Animation Style"). Every animation here runs on transform/opacity
+ * only via CSS @keyframes — no JS animation loop, no canvas — so it's
+ * compositor-only and cheap regardless of which style is active. Color
+ * and speed come from --footer-wave-color/--footer-wave-speed (also
+ * Customizer-driven, see inc/customizer.php). Only one style's markup is
+ * ever in the DOM at a time (template-parts/footer/wave-{style}.php),
+ * so the CSS for the other two styles simply never matches anything.
+ */
+.footer-wave {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	pointer-events: none;
+}
+/*
+ * Align To (Customizer: Footer → "Align To") — which edge of the footer
+ * the wave sits against.
+ */
+.footer-wave--align-top { top: 0; }
+.footer-wave--align-bottom { bottom: 0; }
+
+/*
+ * Each style's natural crest height, as a custom property rather than a
+ * hardcoded height on .footer-wave itself — Size Mode (below) needs the
+ * same number in two different places (the whole element's height in
+ * Short mode, just the inner crest's height in Full mode), and the mobile
+ * override further down only has to touch one declaration per style.
+ */
+.footer-wave--gentle { --wave-crest-h: 50px; }
+.footer-wave--ocean  { --wave-crest-h: 70px; }
+.footer-wave--aurora { --wave-crest-h: 56px; }
+
+.footer-wave__svg,
+.footer-wave__aurora-wrap {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/*
+ * Size Mode (Customizer: Footer → "Size Mode").
+ * Short View: the crest band IS the whole element, at its natural height.
+ * Full Height: .footer-wave stretches to the footer's entire height and
+ * washes it in a solid --footer-wave-color fill; the crest (SVG or the
+ * aurora blob cluster) keeps its natural small height and pins to
+ * whichever edge Align To picked, via its own absolute positioning inside
+ * the now-tall wrapper.
+ */
+.footer-wave--size-short { height: var(--wave-crest-h); }
+
+.footer-wave--size-full {
+	height: 100%;
+	/* --footer-wave-wash-color is the same wave color capped at a fixed low
+	 * alpha (see inc/customizer.php) — using the full-strength wave color
+	 * here made the whole footer visually look like it changed to whatever
+	 * color was picked, since this wash spans the entire footer height. */
+	background: var(--footer-wave-wash-color, rgba(255, 255, 255, 0.12));
+}
+.footer-wave--size-full .footer-wave__svg,
+.footer-wave--size-full .footer-wave__aurora-wrap {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: var(--wave-crest-h);
+}
+.footer-wave--size-full.footer-wave--align-top .footer-wave__svg,
+.footer-wave--size-full.footer-wave--align-top .footer-wave__aurora-wrap {
+	top: 0;
+}
+.footer-wave--size-full.footer-wave--align-bottom .footer-wave__svg,
+.footer-wave--size-full.footer-wave--align-bottom .footer-wave__aurora-wrap {
+	bottom: 0;
+}
+
+/* --- Gentle Wave: single smooth path, calm flow --- */
+.footer-wave--gentle .footer-wave__svg { overflow: hidden; }
+.footer-wave__gentle-path {
+	fill: var(--footer-wave-color, var(--color-footer-bg));
+	animation: footer-wave-flow calc(var(--footer-wave-speed, 6s) * 1.5) linear infinite;
+}
+
+/* --- Ocean Waves: three layered passes + gooey rising bubbles --- */
+.footer-wave--ocean .footer-wave__svg { overflow: visible; } /* let the goo drops splash past the crest's own edge */
+.footer-wave--ocean .footer-wave__layer {
+	fill: var(--footer-wave-color, var(--color-footer-bg));
+	animation: footer-wave-flow var(--footer-wave-speed, 6s) linear infinite;
+}
+.footer-wave--ocean .footer-wave__layer--2 {
+	opacity: 0.6;
+	animation-duration: calc(var(--footer-wave-speed, 6s) * 3.333);
+	animation-direction: reverse;
+}
+.footer-wave--ocean .footer-wave__layer--3 {
+	opacity: 0.3;
+	animation-duration: calc(var(--footer-wave-speed, 6s) * 4);
+}
+.footer-wave--ocean .footer-wave__drop {
+	fill: var(--footer-wave-color, var(--color-footer-bg));
+	stroke: var(--footer-wave-color, var(--color-footer-bg));
+	stroke-width: 0.5;
+	transform: translateY(25px);
+	transform-box: fill-box;
+	transform-origin: 50% 100%;
+	animation: footer-wave-drop 8.2s linear infinite normal;
+}
+.footer-wave--ocean .footer-wave__drop--2 { animation-delay: 8s; animation-duration: 8s; }
+.footer-wave--ocean .footer-wave__drop--3 { animation-delay: -7s; animation-duration: 8.4s; }
+.footer-wave--ocean .footer-wave__drop--4 { animation-delay: 6.7s; }
+.footer-wave--ocean .footer-wave__drop--5 { animation-delay: 7.7s; animation-duration: 8.1s; }
+.footer-wave--ocean .footer-wave__drop--6 { animation-delay: -7.1s; animation-duration: 8.2s; }
+
+/* --- Aurora Ripple: pure CSS rotating ellipses, no SVG --- */
+.footer-wave__aurora-wrap {
+	position: relative;
+	overflow: hidden;
+}
+.footer-wave__aurora-blob {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 1400px;
+	height: 340px;
+	margin-left: -700px;
+	margin-top: -170px;
+	border-radius: 45%;
+	background: var(--footer-wave-color, var(--color-footer-bg));
+}
+.footer-wave__aurora-blob--1 {
+	opacity: 0.16;
+	animation: footer-wave-spin calc(var(--footer-wave-speed, 6s) * 1.67) linear infinite;
+}
+.footer-wave__aurora-blob--2 {
+	opacity: 0.26;
+	width: 1100px;
+	height: 260px;
+	margin-left: -550px;
+	margin-top: -130px;
+	animation: footer-wave-spin calc(var(--footer-wave-speed, 6s) * 1.67) linear infinite reverse;
+	animation-delay: calc(var(--footer-wave-speed, 6s) * -0.5);
+}
+.footer-wave__aurora-blob--3 {
+	opacity: 0.46;
+	width: 800px;
+	height: 190px;
+	margin-left: -400px;
+	margin-top: -95px;
+	animation: footer-wave-spin calc(var(--footer-wave-speed, 6s) * 2.67) linear infinite;
+	animation-delay: calc(var(--footer-wave-speed, 6s) * -0.9);
+}
+
+/* --- shared keyframes --- */
+@keyframes footer-wave-flow {
+	to { transform: translateX(-100%); }
+}
+@keyframes footer-wave-drop {
+	0% { transform: translateY(25px); }
+	30% { transform: translateY(-10px) scale(0.1); }
+	30.001% { transform: translateY(25px) scale(1); }
+	70% { transform: translateY(25px); }
+	100% { transform: translateY(-10px) scale(0.1); }
+}
+@keyframes footer-wave-spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+	.footer-wave--gentle { --wave-crest-h: 34px; }
+	.footer-wave--ocean  { --wave-crest-h: 50px; }
+	.footer-wave--aurora { --wave-crest-h: 40px; }
+}
+
+.footer-brand { max-width: 280px; align-self: end; }
+.footer-brand img { width: var(--footer-logo-width, 160px); height: var(--footer-logo-height, 40px); object-fit: contain; margin-bottom: 10px; }
+.footer-brand p { color: var(--color-footer-text); opacity: 0.85; font-size: 0.9rem; margin-bottom: 0; }
+.footer-social { display: flex; gap: 10px; margin-top: 14px; }
+.footer-social a {
+	width: 34px; height: 34px;
+	display: inline-flex; align-items: center; justify-content: center;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.08);
+	transition: background var(--transition-base), transform var(--transition-base);
+}
+.footer-social a:hover { background: var(--color-footer-accent); color: var(--color-dark); transform: translateY(-2px); }
+.footer-social svg { width: 16px; height: 16px; }
+
+.footer-widgets {
+	display: grid;
+	grid-template-columns: 1.1fr repeat(3, 1fr);
+	gap: 32px;
+	padding-block: 32px;
+	align-items: end;
+}
+.footer-widgets .widget-title,
+.footer-widgets h2, .footer-widgets h3 {
+	font-size: 1.05rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin-bottom: 20px;
+}
+.footer-widgets ul { list-style: none; margin: 0; padding: 0; }
+.footer-widgets li { margin-bottom: 12px; opacity: 0.9; }
+.footer-widgets input[type="email"], .footer-widgets input[type="text"] {
+	width: 100%;
+	padding: 12px 16px;
+	border-radius: var(--radius-pill);
+	border: 1px solid rgba(255,255,255,0.2);
+	background: rgba(255,255,255,0.06);
+	color: var(--color-white);
+	margin-bottom: 10px;
+}
+
+.footer-bottom {
+	border-top: 1px solid rgba(255,255,255,0.1);
+	padding-block: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	font-size: 0.85rem;
+	opacity: 0.75;
+}
+.footer-bottom ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+
+@media (max-width: 1024px) {
+	.footer-widgets { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+	.footer-widgets { grid-template-columns: 1fr; }
+	.footer-bottom { flex-direction: column; text-align: center; }
+}

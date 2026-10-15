@@ -1,0 +1,123 @@
+.customize-control-range input[type="range"] {
+	display: inline-block;
+	width: calc(100% - 48px);
+	vertical-align: middle;
+}
+.solaris-range-value {
+	display: inline-block;
+	min-width: 40px;
+	margin-left: 8px;
+	padding: 2px 6px;
+	font-size: 12px;
+	font-weight: 600;
+	text-align: center;
+	color: #1e1e1e;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	vertical-align: middle;
+}
+
+/* Dual-input "from/to" range control (e.g. Fighter-Z's next-travel delay) */
+.solaris-range-control { display: flex; gap: 12px; }
+.solaris-range-control__field { flex: 1; display: block; }
+.solaris-range-control__label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #1e1e1e; }
+.solaris-range-control__field input[type="number"] { width: 100%; }
+
+/* Page checklist control (Fighter-Z "Specific Pages") -------------------- */
+.solaris-page-checklist {
+	max-height: 200px;
+	overflow-y: auto;
+	margin-top: 8px;
+	padding: 8px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+}
+.solaris-page-checklist__item { display: block; padding: 3px 0; font-size: 13px; }
+.solaris-page-checklist__item input[type="checkbox"] { margin-right: 6px; }
+
+/* Hero Slides repeater control ------------------------------------------- */
+.solaris-hero-slides__list { margin: 8px 0; padding: 0; list-style: none; }
+.solaris-hero-slides__item {
+	padding: 6px;
+	margin-bottom: 6px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+.solaris-hero-slides__handle { cursor: grab; color: #787c82; font-size: 16px; line-height: 1; }
+.solaris-hero-slides__thumb { width: 48px; height: 36px; object-fit: cover; border-radius: 2px; background: #f0f0f1; flex-shrink: 0; }
+.solaris-hero-slides__active { display: flex; align-items: center; }
+.solaris-hero-slides__remove { font-size: 12px; white-space: nowrap; color: #b32d2e; }
+.solaris-hero-slides__replace,
+.solaris-hero-slides__toggle-text {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	text-decoration: none;
+	flex-shrink: 0;
+}
+.solaris-hero-slides__replace .dashicons,
+.solaris-hero-slides__toggle-text .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+.solaris-hero-slides__add { margin-top: 4px; }
+.solaris-hero-slides__item.ui-sortable-helper { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+.solaris-hero-slides__row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.solaris-hero-slides__details {
+	display: none;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid #dcdcde;
+}
+.solaris-hero-slides__details.is-open { display: flex; }
+.solaris-hero-slides__details label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: #1e1e1e;
+}
+.solaris-hero-slides__details input[type="text"],
+.solaris-hero-slides__details input[type="url"],
+.solaris-hero-slides__details textarea {
+	display: block;
+	width: 100%;
+	margin-top: 2px;
+	font-size: 12px;
+	font-weight: 400;
+}
+.solaris-hero-slides__field-pair {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+
+/* FAQ Items repeater control ---------------------------------------------- */
+.solaris-faq-items__list { margin: 8px 0; padding: 0; list-style: none; }
+.solaris-faq-items__item {
+	padding: 8px;
+	margin-bottom: 6px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+.solaris-faq-items__item.ui-sortable-helper { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.solaris-faq-items__row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.solaris-faq-items__handle { cursor: grab; color: #787c82; font-size: 16px; line-height: 1; flex-shrink: 0; }
+.solaris-faq-items__question { flex: 1; font-weight: 600; }
+.solaris-faq-items__remove { font-size: 12px; white-space: nowrap; color: #b32d2e; flex-shrink: 0; }
+.solaris-faq-items__answer { display: block; width: 100%; font-size: 12px; font-weight: 400; }
+.solaris-faq-items__add { margin-top: 4px; }

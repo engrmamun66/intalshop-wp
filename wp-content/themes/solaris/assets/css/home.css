@@ -1,0 +1,545 @@
+/* Hero ------------------------------------------------------------------ */
+.hero {
+	position: relative;
+	min-height: calc(100vh - 0px);
+	display: flex;
+	align-items: center;
+	color: var(--color-white);
+	background-color: var(--color-dark);
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+}
+.hero::before {
+	content: '';
+	position: absolute; inset: 0;
+	z-index: 1;
+	background: linear-gradient(115deg, rgba(7,28,21, var(--hero-overlay, 0.72)) 0%, rgba(11,61,46, calc(var(--hero-overlay, 0.72) * 0.75)) 55%, rgba(7,28,21, calc(var(--hero-overlay, 0.72) * 0.4)) 100%);
+}
+.hero-overflow-image {
+	position: absolute;
+	width: 200px;
+	height: auto;
+	z-index: 1;
+	bottom: 80px;
+	left: calc(50% - 100px);
+	transform: perspective(130px);
+	opacity: 0.9;
+}
+/* Matches the solar-system decoration's own tablet/mobile cutoff (solar-system.css). */
+@media (max-width: 1024px) {
+	.hero-overflow-image,
+	.hero-scroll-cue {
+		display: none;
+	}
+}
+
+/* Hero slider (only present with 2+ active Hero Slides configured) ------- */
+.hero-slider {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+}
+.hero-slide {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	opacity: 0;
+}
+.hero-slider--fade .hero-slide {
+	transition: opacity 1s ease;
+}
+.hero-slider--fade .hero-slide.is-active {
+	opacity: 1;
+}
+.hero-slider--slide .hero-slide {
+	transform: translateX(100%);
+	transition: opacity 1s ease, transform 1s ease;
+}
+.hero-slider--slide .hero-slide.is-active {
+	opacity: 1;
+	transform: translateX(0);
+}
+.hero-slider--zoom .hero-slide {
+	transform: scale(1.12);
+	transition: opacity 1s ease, transform 1s ease;
+}
+.hero-slider--zoom .hero-slide.is-active {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.hero-dots {
+	position: absolute;
+	z-index: 3;
+	bottom: 28px;
+	right: clamp(20px, 4vw, 40px);
+	display: flex;
+	gap: 10px;
+}
+.hero-dots__dot {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 10px; height: 10px;
+	padding: 0;
+	border: 2px solid rgba(255,255,255,0.6);
+	border-radius: 50%;
+	background: transparent;
+	cursor: pointer;
+	transition: background var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
+}
+.hero-dots__dot:hover { border-color: var(--color-white); transform: scale(1.15); }
+.hero-dots__dot.is-active { background: var(--color-primary); border-color: var(--color-primary); }
+@media (max-width: 640px) { .hero-dots { bottom: 20px; } }
+.hero-inner {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	max-width: var(--container-width);
+	margin-inline: auto;
+	padding: calc(var(--header-height) + 40px) clamp(20px, 4vw, 40px) 80px;
+}
+.hero-content { max-width: 640px; position: relative; top: -70px; }
+.hero-inner--multi {
+	min-height: 380px;
+}
+.hero-inner--multi .hero-content {
+	/*
+	 * An absolutely-positioned child with inset:0 fills its containing
+	 * block's PADDING box, not its content box — meaning it sits flush
+	 * with the outer edge of .hero-inner's own padding, completely
+	 * bypassing it (text touching the viewport edge at any width where
+	 * .hero-inner itself is narrower than --container-width and so spans
+	 * edge-to-edge). padding:inherit re-applies that same padding here so
+	 * slide text lines up with the non-slider layout, which never had
+	 * this problem since its .hero-content is a normal in-flow child.
+	 */
+	position: absolute;
+	inset: 0;
+	top: -70px;
+	padding: inherit;
+	opacity: 0;
+	/*
+	 * Inactive slides are invisible but were still fully hit-testable —
+	 * position:absolute siblings with no z-index paint (and receive clicks)
+	 * in DOM order, so whichever slide comes LAST in the markup sat on top
+	 * of the actually-visible active one and silently swallowed clicks
+	 * meant for it (its CTA buttons, and the sound toggle hero-jet.js
+	 * relocates into the active slide's .hero-actions).
+	 */
+	pointer-events: none;
+	transition: opacity 0.8s ease;
+}
+.hero-inner--multi .hero-content.is-active {
+	opacity: 1;
+	pointer-events: auto;
+}
+@media (max-width: 640px) {
+	.hero-inner--multi { min-height: 420px; }
+}
+
+/*
+ * Hero content-block entrance animation (single Customizer choice, applies
+ * to the whole eyebrow/title/subtext/buttons block as one unit — not the
+ * per-element .reveal/.is-visible IntersectionObserver scroll-reveal used
+ * elsewhere on the homepage, which is one-shot and never replays). A real
+ * @keyframes animation restarts automatically whenever the computed
+ * animation-name flips from none to a value, which happens every time
+ * .is-active toggles onto a slide's .hero-content — so in slider mode this
+ * replays on every slide change; in single-image mode (.hero-content also
+ * carries .is-active, see hero.php) it just plays once on page load.
+ */
+@keyframes heroContentFadeUp {
+	from { opacity: 0; transform: translateY(24px); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes heroContentFadeDown {
+	from { opacity: 0; transform: translateY(-24px); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes heroContentZoomIn {
+	from { opacity: 0; transform: scale(0.85); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes heroContentSlideLeft {
+	from { opacity: 0; transform: translateX(-40px); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes heroContentSlideRight {
+	from { opacity: 0; transform: translateX(40px); }
+	to { opacity: 1; transform: none; }
+}
+.hero-content.is-active.hero-content-anim-fade-up { animation: heroContentFadeUp 0.7s ease both; }
+.hero-content.is-active.hero-content-anim-fade-down { animation: heroContentFadeDown 0.7s ease both; }
+.hero-content.is-active.hero-content-anim-zoom-in { animation: heroContentZoomIn 0.7s ease both; }
+.hero-content.is-active.hero-content-anim-slide-left { animation: heroContentSlideLeft 0.7s ease both; }
+.hero-content.is-active.hero-content-anim-slide-right { animation: heroContentSlideRight 0.7s ease both; }
+
+.hero .eyebrow { color: var(--color-primary); }
+.hero h1 { color: var(--color-white); }
+.hero p.hero-lead { font-size: 1.15rem; color: rgba(255,255,255,0.88); max-width: 520px; }
+.hero-actions { display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap; }
+.hero-scroll-cue {
+	position: absolute;
+	bottom: 28px; left: 50%;
+	transform: translateX(-50%);
+	z-index: 2;
+	color: rgba(255,255,255,0.7);
+	display: flex; flex-direction: column; align-items: center; gap: 6px;
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+.hero-scroll-cue svg { width: 18px; height: 18px; animation: bob 1.8s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+@media (max-width: 640px) {
+	.hero { min-height: 100vh; }
+	.hero-actions { flex-direction: column; align-items: stretch; }
+}
+
+/* Stats ------------------------------------------------------------------ */
+.stats-section { background: var(--gradient-dark); color: var(--color-white); padding-block: 64px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+.stat-item .stat-value {
+	font-family: var(--font-heading);
+	font-size: clamp(2rem, 4vw, 3rem);
+	font-weight: 800;
+	background: var(--gradient-primary);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+.stat-item .stat-label { color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 4px; }
+@media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 28px 20px; } }
+
+/* Category cards --------------------------------------------------------- */
+.category-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: var(--color-white);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	box-shadow: var(--shadow-sm);
+	transition: transform var(--transition-base), box-shadow var(--transition-base);
+	height: 100%;
+}
+.category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.category-card__media { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--color-background-alt); }
+.category-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.category-card:hover .category-card__media img { transform: scale(1.06); }
+.category-card__count {
+	position: absolute; top: 14px; right: 14px;
+	background: rgba(7,28,21,0.75);
+	color: var(--color-white);
+	font-size: 0.75rem; font-weight: 700;
+	padding: 4px 12px;
+	border-radius: var(--radius-pill);
+}
+.category-card__body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.category-card__body h3 { margin: 0; font-size: 1.15rem; }
+.category-card__body p { color: var(--color-muted); font-size: 0.9rem; margin: 0; flex: 1; }
+
+/* Homepage blog post cards (template-parts/home/blog-posts.php) ----------- */
+.post-card {
+	display: flex;
+	flex-direction: column;
+	background: var(--color-white);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	box-shadow: var(--shadow-sm);
+	transition: transform var(--transition-base), box-shadow var(--transition-base);
+	height: 100%;
+}
+.post-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.post-card__media { display: block; aspect-ratio: 16/10; overflow: hidden; background: var(--color-background-alt); }
+.post-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.post-card:hover .post-card__media img { transform: scale(1.06); }
+.post-card__placeholder {
+	width: 100%; height: 100%;
+	display: flex; align-items: center; justify-content: center;
+	background: var(--gradient-light);
+	color: var(--color-accent);
+}
+.post-card__body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.post-card__meta {
+	display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--color-muted);
+}
+.post-card__category {
+	padding: 3px 10px;
+	border-radius: var(--radius-pill);
+	background: var(--color-background-alt);
+	color: var(--color-accent);
+	font-weight: 700;
+}
+.post-card__body h3 { margin: 0; font-size: 1.15rem; line-height: 1.35; }
+.post-card__body h3 a { color: var(--color-heading); }
+.post-card__body h3 a:hover { color: var(--color-accent); }
+.post-card__excerpt { color: var(--color-muted); font-size: 0.9rem; margin: 0; flex: 1; }
+.post-card .btn--ghost { align-self: flex-start; }
+
+/* Shared "section with optional Customizer background image" scaffold ---
+ * used by Why Choose Us, Solar Solutions, Customer Stories and FAQ. The
+ * section carries `has-section-bg`; solaris_section_bg_image() (see
+ * inc/template-functions.php) renders the .section-bg-image layer only
+ * when a background image is actually configured. */
+.has-section-bg { position: relative; overflow: hidden; }
+.has-section-bg > .container { position: relative; z-index: 1; }
+.section-bg-image {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background-size: cover;
+	background-position: center;
+	pointer-events: none;
+}
+.section-bg-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+/* Featured products ("Top Picks") — section-only styling; cards are
+ * genuine WooCommerce markup, deliberately left untouched here. */
+.featured-products-section { background-color: var(--featured-products-bg-color); }
+.featured-products-section .section-header .eyebrow { color: var(--featured-products-eyebrow-color); }
+.featured-products-section .section-header h2 { color: var(--featured-products-title-color); }
+
+/* Feature / why-choose-us cards ------------------------------------------ */
+.why-choose-us-section { background-color: var(--why-choose-bg-color); }
+.why-choose-us-section .section-header .eyebrow { color: var(--why-choose-eyebrow-color); }
+.why-choose-us-section .section-header h2 { color: var(--why-choose-title-color); }
+
+.feature-card {
+	background: var(--why-choose-card-bg);
+	border: 1px solid var(--why-choose-card-border);
+	border-radius: var(--radius-lg);
+	padding: 32px 28px;
+	height: 100%;
+	transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.why-choose-hover-lift .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.why-choose-hover-glow .feature-card:hover { box-shadow: 0 0 0 1px var(--color-primary), 0 16px 32px -12px var(--color-primary); }
+.why-choose-hover-border .feature-card:hover { border-color: var(--color-primary); }
+.feature-card__icon {
+	width: 56px; height: 56px;
+	display: flex; align-items: center; justify-content: center;
+	border-radius: var(--radius-md);
+	background: var(--why-choose-icon-bg);
+	color: var(--why-choose-icon-color);
+	margin-bottom: 20px;
+	transition: transform var(--transition-base);
+}
+.why-choose-hover-zoom .feature-card:hover .feature-card__icon { transform: scale(1.15); }
+.feature-card__icon svg { width: 28px; height: 28px; }
+.feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.feature-card p { color: var(--why-choose-card-text); margin: 0; font-size: 0.92rem; }
+
+/* Card entrance animation variants — the base .reveal (home/base.css) is
+ * a translate-up fade; these override its hidden-state transform per the
+ * Customizer's "Card Entrance Animation" choice. */
+.why-choose-anim-zoom-in .feature-card.reveal { transform: scale(0.85); }
+.why-choose-anim-slide-left .feature-card.reveal { transform: translateX(-40px); }
+.why-choose-anim-slide-right .feature-card.reveal { transform: translateX(40px); }
+/* Reset back to base.css's .reveal.is-visible transform: the 3-class
+ * hidden-state selectors above outrank that 2-class rule, so without an
+ * equally-specific reset here the card would stay stuck mid-animation. */
+.why-choose-anim-zoom-in .feature-card.reveal.is-visible,
+.why-choose-anim-slide-left .feature-card.reveal.is-visible,
+.why-choose-anim-slide-right .feature-card.reveal.is-visible { transform: none; }
+.why-choose-anim-none .feature-card.reveal { opacity: 1; transform: none; transition: none; }
+
+/* Solutions --------------------------------------------------------------- */
+.solutions-section { background-color: var(--solutions-bg-color); }
+.solutions-section .section-header .eyebrow { color: var(--solutions-eyebrow-color); }
+.solutions-section .section-header h2 { color: var(--solutions-title-color); }
+.solution-card {
+	position: relative;
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	min-height: 360px;
+	display: flex;
+	align-items: flex-end;
+	color: var(--solutions-card-text);
+	background-size: cover;
+	background-position: center;
+	background-color: var(--color-dark-green);
+	border: 1px solid var(--solutions-card-border);
+	transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.solution-card::before {
+	content: '';
+	position: absolute; inset: 0;
+	background: linear-gradient(0deg, rgba(var(--solutions-card-overlay-rgb), 0.92) 0%, rgba(var(--solutions-card-overlay-rgb), 0.35) 55%, rgba(var(--solutions-card-overlay-rgb), 0.05) 100%);
+}
+.solution-card__body { position: relative; z-index: 1; padding: 28px; }
+/*
+ * Absolutely positioned against .solution-card (fixed min-height, the
+ * nearest positioned ancestor) rather than flowing inside .solution-card__body.
+ * The card uses align-items:flex-end to bottom-anchor its content, so
+ * .solution-card__body's own height — and with it, the position of anything
+ * flowing inside it — shifts up or down depending on how many lines each
+ * card's description text wraps to. With the icon living in that flow, it
+ * drifted a different amount on every card (a visible staircase). Pinning
+ * it here instead guarantees the exact same position on every card,
+ * completely independent of how much text is below it.
+ */
+.solution-card__icon {
+	position: absolute;
+	top: 28px; left: 28px;
+	z-index: 1;
+	width: 48px; height: 48px;
+	display: flex; align-items: center; justify-content: center;
+	border-radius: var(--radius-md);
+	background: var(--solutions-icon-bg);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+	color: var(--solutions-icon-color);
+	transition: transform var(--transition-base);
+}
+.solution-card__icon svg { width: 24px; height: 24px; }
+.solution-card__body h3 { color: var(--solutions-card-text); margin-bottom: 8px; }
+.solution-card__body p { color: var(--solutions-card-text); opacity: 0.85; font-size: 0.92rem; margin-bottom: 14px; }
+
+.solutions-hover-lift .solution-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.solutions-hover-zoom .solution-card:hover .solution-card__icon { transform: scale(1.15); }
+.solutions-hover-glow .solution-card:hover { box-shadow: 0 0 0 1px var(--color-primary), 0 16px 32px -12px var(--color-primary); }
+.solutions-hover-border .solution-card:hover { border-color: var(--color-primary); }
+
+.solutions-anim-zoom-in .solution-card.reveal { transform: scale(0.85); }
+.solutions-anim-slide-left .solution-card.reveal { transform: translateX(-40px); }
+.solutions-anim-slide-right .solution-card.reveal { transform: translateX(40px); }
+.solutions-anim-zoom-in .solution-card.reveal.is-visible,
+.solutions-anim-slide-left .solution-card.reveal.is-visible,
+.solutions-anim-slide-right .solution-card.reveal.is-visible { transform: none; }
+.solutions-anim-none .solution-card.reveal { opacity: 1; transform: none; transition: none; }
+
+/* Promo / final CTA banners ---------------------------------------------- */
+.cta-banner {
+	border-radius: var(--radius-lg);
+	padding: clamp(40px, 6vw, 72px);
+	text-align: center;
+}
+.cta-banner h2 { max-width: 640px; margin-inline: auto; }
+.cta-banner p { max-width: 520px; margin-inline: auto; opacity: 0.92; }
+.cta-banner .hero-actions { justify-content: center; }
+.final-cta { margin-inline: clamp(20px, 4vw, 40px); }
+
+/* Testimonials ------------------------------------------------------------ */
+.testimonials-section { background-color: var(--testimonials-bg-color); }
+.testimonials-section .section-header .eyebrow { color: var(--testimonials-eyebrow-color); }
+.testimonials-section .section-header h2 { color: var(--testimonials-title-color); }
+.testimonial-card {
+	background: var(--testimonials-card-bg);
+	border: 1px solid var(--testimonials-card-border);
+	border-radius: var(--radius-lg);
+	padding: 32px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.testimonial-card__quote { font-size: 1.02rem; color: var(--testimonials-card-text); flex: 1; }
+.testimonial-card__quote::before { content: '\201C'; color: var(--color-accent); font-size: 1.4em; font-weight: 700; }
+.testimonial-card__author { display: flex; align-items: center; gap: 12px; }
+.testimonial-card__avatar {
+	width: 44px; height: 44px; border-radius: 50%;
+	background: var(--testimonials-avatar-bg);
+	color: var(--testimonials-avatar-text);
+	display: flex; align-items: center; justify-content: center;
+	font-weight: 700;
+	overflow: hidden;
+	transition: transform var(--transition-base);
+}
+.testimonial-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.testimonial-card__name { font-weight: 700; color: var(--color-heading); }
+.testimonial-card__role { font-size: 0.82rem; color: var(--color-muted); }
+
+.testimonials-hover-lift .testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.testimonials-hover-zoom .testimonial-card:hover .testimonial-card__avatar { transform: scale(1.15); }
+.testimonials-hover-glow .testimonial-card:hover { box-shadow: 0 0 0 1px var(--color-primary), 0 16px 32px -12px var(--color-primary); }
+.testimonials-hover-border .testimonial-card:hover { border-color: var(--color-primary); }
+
+.testimonials-anim-zoom-in .testimonial-card.reveal { transform: scale(0.85); }
+.testimonials-anim-slide-left .testimonial-card.reveal { transform: translateX(-40px); }
+.testimonials-anim-slide-right .testimonial-card.reveal { transform: translateX(40px); }
+.testimonials-anim-zoom-in .testimonial-card.reveal.is-visible,
+.testimonials-anim-slide-left .testimonial-card.reveal.is-visible,
+.testimonials-anim-slide-right .testimonial-card.reveal.is-visible { transform: none; }
+.testimonials-anim-none .testimonial-card.reveal { opacity: 1; transform: none; transition: none; }
+
+/* FAQ accordion ------------------------------------------------------------ */
+.faq-section { background-color: var(--faq-bg-color); }
+.faq-section .section-header .eyebrow { color: var(--faq-eyebrow-color); }
+.faq-section .section-header h2 { color: var(--faq-title-color); }
+.faq-list { max-width: 800px; margin-inline: auto; }
+.faq-item {
+	border-bottom: 1px solid var(--faq-item-border);
+	background: var(--faq-item-bg);
+	transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
+.faq-item__question {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	background: none;
+	border: 0;
+	text-align: left;
+	padding: 22px 4px;
+	font-family: var(--font-heading);
+	font-weight: 700;
+	font-size: 1.05rem;
+	color: var(--faq-item-text);
+	cursor: pointer;
+	transition: color var(--transition-base), background var(--transition-base);
+}
+.faq-item__icon { flex-shrink: 0; width: 24px; height: 24px; transition: transform var(--transition-base), color var(--transition-base); color: var(--faq-icon-color); }
+.faq-item[data-open="true"] .faq-item__icon { transform: rotate(45deg); }
+.faq-item__answer {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height var(--transition-slow);
+}
+.faq-item__answer-inner { padding: 0 4px 22px; color: var(--color-muted); }
+.no-js .faq-item__answer { max-height: none; }
+
+.faq-hover-background .faq-item__question:hover { background: var(--color-background-alt); }
+.faq-hover-accent-text .faq-item__question:hover { color: var(--color-primary); }
+.faq-hover-accent-text .faq-item__question:hover .faq-item__icon { color: var(--color-primary); }
+.faq-hover-border .faq-item:hover { box-shadow: inset 3px 0 0 var(--color-primary); }
+
+.faq-anim-fade-up .faq-item.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.faq-anim-fade-up .faq-item.reveal.is-visible { opacity: 1; transform: none; }
+.faq-anim-zoom-in .faq-item.reveal { opacity: 0; transform: scale(0.85); transition: opacity 0.6s ease, transform 0.6s ease; }
+.faq-anim-zoom-in .faq-item.reveal.is-visible { opacity: 1; transform: none; }
+.faq-anim-slide-left .faq-item.reveal { opacity: 0; transform: translateX(-40px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.faq-anim-slide-left .faq-item.reveal.is-visible { opacity: 1; transform: none; }
+.faq-anim-slide-right .faq-item.reveal { opacity: 0; transform: translateX(40px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.faq-anim-slide-right .faq-item.reveal.is-visible { opacity: 1; transform: none; }
+.faq-anim-none .faq-item.reveal { opacity: 1; transform: none; transition: none; }
+
+/* Benefits strip ----------------------------------------------------------- */
+.benefits-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.benefit-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.benefit-item svg { width: 32px; height: 32px; color: var(--color-accent); }
+.benefit-item strong { color: var(--color-heading); }
+.benefit-item span { color: var(--color-muted); font-size: 0.85rem; }
+@media (max-width: 768px) { .benefits-strip { grid-template-columns: repeat(2, 1fr); } }
+
+/* Empty states -------------------------------------------------------------- */
+.empty-state { text-align: center; padding: 80px 20px; }
+.empty-state svg { width: 72px; height: 72px; color: var(--color-accent); margin-inline: auto 20px; }
+.empty-state h2 { margin-bottom: 8px; }
+.empty-state p { color: var(--color-muted); max-width: 420px; margin-inline: auto 28px; }
+.empty-state .hero-actions { justify-content: center; }

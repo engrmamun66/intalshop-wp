@@ -1,0 +1,107 @@
+/*
+ * "Fly Birds" — a site-wide decorative flock (Customizer: Fly Birds). Fixed
+ * to the viewport, same reasoning as hero-jet.css: this can target any
+ * page, most of which have no hero section at all.
+ *
+ * The bird graphic is the detailed 10-pose wing-flap cycle the site owner
+ * supplied (originally a sprite sheet). Each pose is rendered as its own
+ * inline <svg fill="currentColor"> (solaris_fly_bird_frames() in
+ * template-functions.php), not referenced as an external background-image
+ * or mask-image: this environment's asset-preview sandbox couldn't load ANY
+ * externally-referenced CSS resource, mask or plain background alike, even
+ * same-origin — inlining is what actually renders, and it's also the same
+ * fill="currentColor" technique already used everywhere else in this theme,
+ * so Birds Color (fixed/random) just works with no separate recoloring
+ * mechanism needed. The 10 <svg> frames are stacked (position:absolute;
+ * inset:0) with staggered negative animation-delay on a shared instant-flash
+ * opacity keyframe, so exactly one is visible at a time, cycling in order —
+ * an "N stacked frames, one opaque at a time" approach.
+ *
+ * The flight PATH is adapted from the CodePen reference the site owner
+ * supplied: transform: translateX/translateY/scale waypoints (vw/vh units,
+ * which — unlike percentages in transform — resolve against the viewport,
+ * not the element's own box, so they travel the real screen width) for a
+ * wavy glide with a pseudo-3D depth wobble rather than a straight
+ * left-to-right line.
+ */
+.fly-birds-layer {
+	/*
+	 * top:var(--header-height), not inset:0 — the header is semi-transparent
+	 * until .is-stuck lands (header.css), so a bird passing behind its own
+	 * band was visible right through it, reading as the menu "blinking".
+	 * Starting the layer below the header guarantees no bird ever enters
+	 * that band, regardless of the per-bird top% spread (solaris_render_fly_birds()).
+	 */
+	position: fixed;
+	top: var(--header-height);
+	right: 0;
+	bottom: 0;
+	left: 0;
+	overflow: hidden;
+	z-index: 15;
+	pointer-events: none;
+}
+.fly-bird-container {
+	position: absolute;
+	left: 0;
+	opacity: 0;
+	animation-name: fly-birds-path-1;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+.fly-bird-container--v2 {
+	animation-name: fly-birds-path-2;
+}
+.fly-bird {
+	position: relative;
+	display: block;
+	height: auto;
+	aspect-ratio: 367 / 510;
+}
+.fly-bird__frame {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	animation-name: fly-bird-frame-flash;
+	animation-timing-function: steps(1);
+	animation-iteration-count: infinite;
+}
+
+@keyframes fly-bird-frame-flash {
+	0%, 9.9%  { opacity: 1; }
+	10%, 100% { opacity: 0; }
+}
+
+@keyframes fly-birds-path-1 {
+	0%   { transform: translateX(-10vw) translateY(0) scale(0.6); opacity: 0; }
+	6%   { opacity: 1; }
+	10%  { transform: translateX(5vw) translateY(-3vh) scale(0.75); }
+	25%  { transform: translateX(30vw) translateY(2vh) scale(0.9); }
+	40%  { transform: translateX(50vw) translateY(-2vh) scale(1); }
+	60%  { transform: translateX(75vw) translateY(1vh) scale(0.9); }
+	94%  { opacity: 1; }
+	100% { transform: translateX(105vw) translateY(0) scale(0.7); opacity: 0; }
+}
+@keyframes fly-birds-path-2 {
+	0%   { transform: translateX(-10vw) translateY(1vh) scale(0.55); opacity: 0; }
+	6%   { opacity: 1; }
+	15%  { transform: translateX(10vw) translateY(3vh) scale(0.7); }
+	35%  { transform: translateX(35vw) translateY(-2.5vh) scale(0.95); }
+	55%  { transform: translateX(60vw) translateY(2vh) scale(1); }
+	80%  { transform: translateX(85vw) translateY(-1vh) scale(0.85); }
+	94%  { opacity: 1; }
+	100% { transform: translateX(105vw) translateY(0) scale(0.65); opacity: 0; }
+}
+
+/*
+ * Deliberately not frozen under prefers-reduced-motion — the site owner
+ * wants Fly Birds fully visible/animating regardless of that OS setting
+ * for their own testing/demo purposes. Real accessibility tradeoff:
+ * visitors with motion sensitivity no longer get this decorative flock
+ * suppressed automatically.
+ */
+@media (max-width: 640px) {
+	.fly-birds-layer { display: none; }
+}

@@ -1,0 +1,173 @@
+.button, .btn, button.button, input.button, a.button,
+.wc-block-components-button, .wp-element-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-family: var(--font-body);
+	font-weight: 700;
+	font-size: 0.95rem;
+	line-height: 1;
+	padding: 16px 32px;
+	min-height: 48px;
+	border: 0;
+	border-radius: var(--radius-pill);
+	cursor: pointer;
+	white-space: nowrap;
+	text-decoration: none;
+	color: var(--color-button-text);
+	background-image: var(--gradient-button);
+	background-size: 300% 100%;
+	background-position: 0 0;
+	box-shadow: var(--shadow-button);
+	transition: background-position var(--transition-slow), transform var(--transition-base), box-shadow var(--transition-base);
+}
+.button:hover, .btn:hover, button.button:hover, input.button:hover, a.button:hover,
+.wc-block-components-button:hover, .wp-element-button:hover {
+	background-position: 100% 0;
+	transform: translateY(-2px);
+	box-shadow: 0 8px 22px rgba(23, 168, 108, 0.45);
+	color: var(--color-white);
+}
+.button:active, .btn:active { transform: translateY(0); }
+.button:focus-visible, .btn:focus-visible { outline: 3px solid var(--color-dark); outline-offset: 3px; }
+.button[disabled], .btn[disabled], .button.disabled, .btn--loading {
+	opacity: 0.55;
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
+}
+.btn--loading { position: relative; color: transparent !important; }
+.btn--loading::after {
+	content: '';
+	position: absolute;
+	width: 18px; height: 18px;
+	border-radius: 50%;
+	border: 2px solid rgba(7, 28, 21, 0.35);
+	border-top-color: var(--color-button-text);
+	animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/*
+ * Secondary / outline variant. Selector is ".button.btn--outline" (both
+ * classes), not bare ".btn--outline" — every real usage in this theme
+ * carries both classes anyway (class="button btn--outline"), and a bare
+ * single-class selector (0,1,0) has LOWER specificity than the compound
+ * "a.button"/"button.button"/"input.button" in the base rule above
+ * (0,1,1 — one class plus one element). Since these buttons are always
+ * <a> tags, that base rule's gradient fill silently won regardless of
+ * source order, and .btn--outline never actually rendered as an outline
+ * anywhere it wasn't rescued by another, even-higher-specificity rule.
+ */
+.button.btn--outline {
+	background-image: none;
+	background-color: transparent;
+	color: var(--color-heading);
+	box-shadow: none;
+	border: 2px solid var(--color-border);
+}
+.button.btn--outline:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+	box-shadow: none;
+	background-image: none;
+	transform: translateY(-2px);
+}
+.bg-dark .btn--outline, .bg-gradient .btn--outline, .hero .btn--outline {
+	color: var(--color-white);
+	border-color: rgba(255,255,255,0.45);
+}
+.bg-dark .btn--outline:hover, .bg-gradient .btn--outline:hover, .hero .btn--outline:hover {
+	color: var(--color-white);
+	border-color: var(--color-white);
+}
+
+/* Ghost / text link button --------------------------------------------- */
+.btn--ghost {
+	background: none;
+	box-shadow: none;
+	color: var(--color-accent);
+	padding: 8px 4px;
+	border-radius: 4px;
+}
+.btn--ghost:hover { background: none; box-shadow: none; transform: none; color: var(--color-dark-green); }
+.btn--ghost::after { content: '\2192'; margin-left: 4px; transition: transform var(--transition-base); }
+.btn--ghost:hover::after { transform: translateX(4px); }
+
+.btn--sm { padding: 10px 22px; min-height: 38px; font-size: 0.85rem; }
+.btn--block { width: 100%; }
+
+/*
+ * WooCommerce's own default styling sets a plain gray background (plus its
+ * own padding/border-radius/font-size/etc.) on ".woocommerce a.button" (and
+ * button.button/input.button) — that selector's specificity beats a bare
+ * ".button" rule regardless of load order, same issue already found and
+ * fixed for the product-loop cards. It resurfaces on EVERY plain .button
+ * anywhere on a page carrying the .woocommerce/.woocommerce-page body class
+ * (shop, product, cart, checkout, account) — the header "Shop Now" CTA
+ * included, since that's not inside the product loop. Re-asserting the full
+ * button treatment at matching specificity here, once, covers all of them.
+ */
+.woocommerce a.button:not(.btn--outline), .woocommerce button.button:not(.btn--outline), .woocommerce input.button:not(.btn--outline),
+.woocommerce-page a.button:not(.btn--outline), .woocommerce-page button.button:not(.btn--outline), .woocommerce-page input.button:not(.btn--outline) {
+	/*
+	 * display/align-items/justify-content/padding matter here too, not just
+	 * color — WooCommerce's own rule also sets display:inline-block, and
+	 * without flex + align-items:center reasserted, text stops being
+	 * vertically centered and just sits at the box's natural top instead
+	 * (min-height:48px from the base .button rule still applies, so there's
+	 * plenty of leftover empty space below the text once that happens).
+	 */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 32px;
+	font-family: var(--font-body);
+	font-weight: 700;
+	line-height: 1;
+	border: 0;
+	border-radius: var(--radius-pill);
+	background-color: transparent;
+	background-image: var(--gradient-button);
+	background-size: 300% 100%;
+	background-position: 0 0;
+	color: var(--color-button-text);
+	box-shadow: var(--shadow-button);
+	text-shadow: none;
+}
+.woocommerce a.button:not(.btn--outline):hover, .woocommerce button.button:not(.btn--outline):hover, .woocommerce input.button:not(.btn--outline):hover,
+.woocommerce-page a.button:not(.btn--outline):hover, .woocommerce-page button.button:not(.btn--outline):hover, .woocommerce-page input.button:not(.btn--outline):hover {
+	background-color: transparent;
+	background-position: 100% 0;
+	color: var(--color-white);
+	box-shadow: 0 8px 22px rgba(23, 168, 108, 0.45);
+}
+.woocommerce a.button.btn--sm, .woocommerce button.button.btn--sm, .woocommerce input.button.btn--sm,
+.woocommerce-page a.button.btn--sm, .woocommerce-page button.button.btn--sm, .woocommerce-page input.button.btn--sm {
+	padding: 10px 22px;
+	font-size: 0.85rem;
+}
+
+.woocommerce a.button.btn--outline, .woocommerce button.button.btn--outline, .woocommerce input.button.btn--outline,
+.woocommerce-page a.button.btn--outline, .woocommerce-page button.button.btn--outline, .woocommerce-page input.button.btn--outline {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 32px;
+	background-image: none;
+	background-color: transparent;
+	color: var(--color-heading);
+	border: 2px solid var(--color-border);
+	border-radius: var(--radius-pill);
+	box-shadow: none;
+	text-shadow: none;
+}
+.woocommerce a.button.btn--outline:hover, .woocommerce button.button.btn--outline:hover, .woocommerce input.button.btn--outline:hover,
+.woocommerce-page a.button.btn--outline:hover, .woocommerce-page button.button.btn--outline:hover, .woocommerce-page input.button.btn--outline:hover {
+	background-color: transparent;
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}

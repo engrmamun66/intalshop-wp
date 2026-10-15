@@ -1,0 +1,79 @@
+/**
+ * Design tokens. Customizer output (inc/customizer.php -> solaris_customizer_css())
+ * prints an inline <style> block after this file that overrides these same
+ * custom properties with live admin values, so keep every color/typography
+ * choice in the theme routed through one of these vars instead of literals.
+ */
+:root {
+	--color-primary: #30dd8a;
+	--color-secondary: #30dd8a;
+	--color-accent: #2bb673;
+	--color-dark: #071c15;
+	--color-dark-green: #0b3d2e;
+	--color-green: #0ba360;
+	--color-gradient-green: #3cba92;
+
+	--color-white: #ffffff;
+	--color-background: #f4fbf7;
+	--color-background-alt: #e8fff3;
+	--color-text: #17231e;
+	--color-heading: #0b3d2e;
+	--color-muted: #66736d;
+	--color-border: #dcebe3;
+
+	--color-header-bg: #ffffff;
+	--color-header-text: #17231e;
+	--color-footer-bg: #071c15;
+	--color-footer-text: #cfe9db;
+	--color-footer-heading: #ffffff;
+	--color-footer-accent: #30dd8a;
+
+	--color-button-text: #ffffff;
+	--color-btn-gradient-start: #0ba360;
+	--color-btn-gradient-mid: #3cba92;
+	--color-btn-gradient-end: #2bb673;
+
+	--color-success: #0ba360;
+	--color-warning: #b9770e;
+	--color-error: #c0392b;
+
+	--gradient-primary: linear-gradient(135deg, #0ba360, #3cba92, #30dd8a, #2bb673);
+	--gradient-dark: linear-gradient(135deg, #071c15, #0b3d2e);
+	--gradient-light: linear-gradient(135deg, #e8fff3, #ffffff);
+	--gradient-button: linear-gradient(to right, var(--color-btn-gradient-start), var(--color-btn-gradient-mid), var(--color-btn-gradient-end), var(--color-btn-gradient-end));
+
+	--font-heading: 'Space Grotesk', 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+	--font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+	--font-size-base: 16px;
+	--heading-scale: 1.25;
+	--line-height-base: 1.65;
+
+	--radius-sm: 10px;
+	--radius-md: 16px;
+	--radius-lg: 24px;
+	--radius-pill: 50px;
+
+	--shadow-sm: 0 2px 8px rgba(7, 28, 21, 0.06);
+	--shadow-md: 0 10px 30px rgba(7, 28, 21, 0.10);
+	--shadow-lg: 0 20px 50px rgba(7, 28, 21, 0.14);
+	--shadow-button: 0 4px 15px rgba(23, 168, 108, 0.35);
+
+	--container-width: 1280px;
+	--space-section: clamp(56px, 8vw, 120px);
+
+	--header-height: 88px;
+	--header-transparent-opacity: 1;
+
+	/*
+	 * Bare-duration variants exist alongside the compound ones below because
+	 * a `transition-delay`/`animation-delay` slot only accepts a single
+	 * <time> value — dropping the compound "0.4s ease-in-out" value in there
+	 * makes the whole shorthand declaration invalid (extra token after the
+	 * delay slot), and the browser just silently drops it, no console
+	 * warning. Bit us exactly once already (search modal close animation).
+	 */
+	--transition-base-duration: 0.25s;
+	--transition-slow-duration: 0.4s;
+	--transition-base: var(--transition-base-duration) ease;
+	--transition-slow: var(--transition-slow-duration) ease-in-out;
+}

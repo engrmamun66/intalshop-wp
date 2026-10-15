@@ -1,0 +1,320 @@
+/*
+ * Header cart icon click target (Customizer: Product Cards → Cart Count
+ * From Header — Select Action). Same open/close mechanics as search-modal.css (visibility
+ * delayed on close so the panel's own transform/opacity transition gets a
+ * chance to play instead of vanishing instantly), but one shared skeleton
+ * (.cart-panel / .cart-panel__backdrop / .cart-panel__box) repositioned per
+ * mode via the [data-cart-panel-mode="..."] attribute the PHP template part
+ * prints — only one mode is ever active on a given site, so these blocks
+ * never compete with each other.
+ */
+.cart-panel {
+	position: fixed;
+	inset: 0;
+	z-index: 2000;
+	visibility: hidden;
+	pointer-events: none;
+	transition: visibility 0s linear var(--transition-slow-duration);
+}
+.cart-panel[data-open="true"] {
+	visibility: visible;
+	pointer-events: auto;
+	transition-delay: 0s;
+}
+
+.cart-panel__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(7, 28, 21, 0.55);
+	opacity: 0;
+	transition: opacity var(--transition-slow);
+}
+.cart-panel[data-open="true"] .cart-panel__backdrop { opacity: 1; }
+
+.cart-panel__box {
+	display: flex;
+	flex-direction: column;
+	background: var(--color-white);
+	box-shadow: var(--shadow-lg);
+	transition: transform var(--transition-slow), opacity var(--transition-slow);
+}
+.cart-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 18px clamp(20px, 4vw, 28px);
+	border-bottom: 1px solid var(--color-border);
+	flex-shrink: 0;
+}
+.cart-panel__header h2 { margin: 0; font-size: 1.1rem; }
+.cart-panel__close {
+	appearance: none;
+	-webkit-appearance: none;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	width: 40px; height: 40px;
+	display: flex; align-items: center; justify-content: center;
+	flex-shrink: 0;
+	border-radius: 50%;
+	color: var(--color-heading);
+	transition: background var(--transition-base);
+}
+.cart-panel__close:hover { background: var(--color-background-alt); }
+.cart-panel__close svg { width: 20px; height: 20px; }
+.cart-panel__body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 20px clamp(20px, 4vw, 28px) 28px;
+}
+/*
+ * Modal/Popup boxes are rounded on all 4 corners (var(--radius-lg)), and
+ * .cart-panel__body is the one with overflow-y:auto — an element's own
+ * overflow only clips to ITS OWN border-radius, not an ancestor's, so
+ * without this its scrollbar track painted as a plain rectangle poking
+ * past the box's rounded bottom-right corner. (Sidebar/Slide Up don't need
+ * it — their boxes aren't rounded on the bottom edge in the first place.)
+ * Needed regardless of the sticky-buttons setting below: body can still be
+ * the actual scroller when that's off.
+ */
+.cart-panel[data-cart-panel-mode="modal"] .cart-panel__body,
+.cart-panel[data-cart-panel-mode="popup"] .cart-panel__body {
+	border-bottom-left-radius: var(--radius-lg);
+	border-bottom-right-radius: var(--radius-lg);
+}
+
+/*
+ * Customizer: Product Cards → "Sticky View Cart/Checkout Buttons?" (default
+ * on, .cart-panel--sticky-buttons class printed by
+ * template-parts/components/cart-panel.php). Off: .cart-panel__body
+ * scrolls as a whole (the rule above), same as before this control
+ * existed — subtotal/buttons scroll away with a long cart. On: body
+ * becomes a flex column and only .woocommerce-mini-cart (the item list)
+ * scrolls, keeping the subtotal + buttons permanently visible below it.
+ */
+.cart-panel--sticky-buttons .cart-panel__body {
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+.cart-panel--sticky-buttons .cart-panel__body .widget_shopping_cart_content {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	flex: 1;
+}
+.cart-panel--sticky-buttons .cart-panel__body .woocommerce-mini-cart {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+/*
+ * Every mode except "popup" locks page scroll while open (main.js) — same
+ * treatment as .search-modal-open / .mobile-nav-open elsewhere in the theme.
+ */
+body.cart-panel-open { overflow: hidden; }
+
+/* --- Mini-cart content (WooCommerce's own woocommerce_mini_cart()) ------ */
+.cart-panel__body .woocommerce-mini-cart {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	/*
+	 * Reserves the scrollbar's own track space instead of it overlaying the
+	 * list (this is now the scrolling element itself when sticky-buttons is
+	 * on — see above) — without it the scrollbar sat directly on top of
+	 * each row's remove (x) button. Graceful no-op on browsers that don't
+	 * support it yet (older Safari); the item's own padding-right below is
+	 * what actually keeps the (x) and product name apart regardless.
+	 */
+	scrollbar-gutter: stable;
+}
+/*
+ * ul.cart_list li — not just .woocommerce-mini-cart-item — because
+ * WooCommerce's own core CSS styles this exact row as
+ * ".woocommerce ul.cart_list li" (padding/margin/list-style), and that
+ * selector's element-level specificity (ul + li) otherwise beats a
+ * class-only selector regardless of load order, silently zeroing out the
+ * padding-right below on any page carrying a .woocommerce body class (shop/
+ * product/cart/checkout) — exactly the same "beat WC's own generic li/ul
+ * rule" issue already documented elsewhere in this theme's WooCommerce CSS.
+ */
+.cart-panel__body ul.cart_list li.woocommerce-mini-cart-item {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	/*
+	 * Right padding reserves a dedicated lane for .remove below (positioned
+	 * within it, not flush at the item's true edge) — without this, a long
+	 * product name had no excluded zone and could render directly under
+	 * the (x) icon, and the (x) itself sat exactly where a scrollbar
+	 * (unsupported scrollbar-gutter, or its own extra width) would too.
+	 * 44px, not a smaller guess: core WooCommerce sizes .remove itself
+	 * (font-size:1.5em; width/height:1em), which computes to 24px here —
+	 * bigger than it looks — and it sits at right:16px, so its own left
+	 * edge reaches to 40px from the item's true edge; 44px clears that
+	 * with a small buffer instead of the two visually touching.
+	 */
+	padding: 14px 44px 14px 0;
+	position: relative;
+}
+.cart-panel__body ul.cart_list li.woocommerce-mini-cart-item:not(:last-child) {
+	border-bottom: 1px solid var(--color-border);
+}
+.cart-panel__body ul.cart_list li.woocommerce-mini-cart-item:first-child { padding-top: 0; }
+.cart-panel__body .woocommerce-mini-cart-item img {
+	width: 56px; height: 56px;
+	object-fit: cover;
+	border-radius: var(--radius-sm);
+	flex-shrink: 0;
+}
+.cart-panel__body .woocommerce-mini-cart-item a:not(.remove) {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex: 1;
+	min-width: 140px;
+	color: var(--color-heading);
+	font-weight: 600;
+	font-size: 0.92rem;
+}
+.cart-panel__body .woocommerce-mini-cart-item .quantity {
+	display: block;
+	width: 100%;
+	padding-left: 68px;
+	color: var(--color-muted);
+	font-size: 0.85rem;
+}
+.cart-panel__body .woocommerce-mini-cart-item .remove {
+	position: absolute;
+	top: 14px;
+	right: 16px;
+}
+.cart-panel__body .woocommerce-mini-cart__total {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 16px 0 0;
+	padding-top: 16px;
+	border-top: 1px solid var(--color-border);
+	font-size: 1rem;
+}
+.cart-panel__body .woocommerce-mini-cart__buttons {
+	display: flex;
+	gap: 12px;
+	margin: 16px 0 0;
+}
+.cart-panel__body .woocommerce-mini-cart__buttons .button { flex: 1; }
+.cart-panel__body .woocommerce-mini-cart__empty-message {
+	text-align: center;
+	color: var(--color-muted);
+	padding: 40px 0;
+	margin: 0;
+}
+
+/* --- Modal View — centered dialog --------------------------------------- */
+.cart-panel[data-cart-panel-mode="modal"] {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+.cart-panel[data-cart-panel-mode="modal"] .cart-panel__box {
+	width: 100%;
+	max-width: 460px;
+	max-height: 85vh;
+	border-radius: var(--radius-lg);
+	transform: scale(0.94);
+	opacity: 0;
+}
+.cart-panel[data-open="true"][data-cart-panel-mode="modal"] .cart-panel__box {
+	transform: scale(1);
+	opacity: 1;
+}
+
+/* --- Sidebar View — full-height, slides in from the right --------------- */
+.cart-panel[data-cart-panel-mode="sidebar"] .cart-panel__box {
+	position: absolute;
+	top: 0; right: 0; bottom: 0;
+	width: min(400px, 100%);
+	max-height: none;
+	transform: translateX(100%);
+}
+.cart-panel[data-open="true"][data-cart-panel-mode="sidebar"] .cart-panel__box {
+	transform: translateX(0);
+}
+
+/* --- Slide Up View — bottom sheet, same mechanics as .search-modal__panel */
+.cart-panel[data-cart-panel-mode="slide-up"] .cart-panel__box {
+	position: absolute;
+	left: 0; right: 0; bottom: 0;
+	max-height: 80vh;
+	border-radius: 20px 20px 0 0;
+	transform: translateY(100%);
+}
+.cart-panel[data-open="true"][data-cart-panel-mode="slide-up"] .cart-panel__box {
+	transform: translateY(0);
+}
+
+/*
+ * --- Popup View — small flyout anchored under the header cart icon, no
+ * page-dimming backdrop (the backdrop stays for click-outside-to-close, just
+ * invisible) and page scroll isn't locked (main.js) — this one behaves like
+ * a dropdown, not a takeover.
+ */
+.cart-panel[data-cart-panel-mode="popup"] .cart-panel__backdrop { background: transparent; }
+.cart-panel[data-cart-panel-mode="popup"] .cart-panel__box {
+	position: absolute;
+	top: 76px;
+	right: clamp(20px, 4vw, 40px);
+	width: min(360px, calc(100vw - 40px));
+	max-height: 70vh;
+	border: 2px solid var(--color-primary);
+	border-radius: var(--radius-lg);
+	transform: translateY(-8px);
+	opacity: 0;
+}
+.cart-panel[data-open="true"][data-cart-panel-mode="popup"] .cart-panel__box {
+	transform: translateY(0);
+	opacity: 1;
+}
+/*
+ * Speech-bubble-style arrow pointing up at the header cart icon —
+ * --cart-panel-arrow-x (set in main.js, initCartPanel's open()) is that
+ * icon's horizontal center, relative to the box's own left edge, since
+ * .cart-panel__box is this pseudo-element's containing block. A rotated
+ * square, same color as the box, half tucked under its top edge so the two
+ * read as one continuous shape rather than a separate floating diamond.
+ */
+.cart-panel[data-cart-panel-mode="popup"] .cart-panel__box::before {
+	content: '';
+	position: absolute;
+	top: -7px;
+	left: var(--cart-panel-arrow-x, 50%);
+	width: 14px;
+	height: 14px;
+	background: var(--color-white);
+	/*
+	 * top/left borders only — after the 45deg rotation below, THESE two
+	 * (adjacent, meeting at the corner border-radius rounds) become the
+	 * diamond's upper-left and upper-right edges, i.e. exactly the "roof"
+	 * that pokes above the box — matching the box's own 2px border so the
+	 * two read as one continuous outline instead of a plain white blob
+	 * sitting on top of it.
+	 */
+	border-top: 2px solid var(--color-primary);
+	border-left: 2px solid var(--color-primary);
+	border-radius: 3px 0 0 0;
+	transform: translateX(-50%) rotate(45deg);
+}
+
+@media (max-width: 640px) {
+	.cart-panel[data-cart-panel-mode="popup"] .cart-panel__box {
+		left: 20px;
+		right: 20px;
+		width: auto;
+	}
+}
